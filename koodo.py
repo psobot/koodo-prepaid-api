@@ -1,7 +1,13 @@
 import mechanize
 import getpass
 import json
+import csv
+import sys
+import time
 from bs4 import BeautifulSoup
+
+
+CSV_FILE = "koodo.csv"
 
 
 def fetch_html(username, password):
@@ -30,6 +36,17 @@ def distill_html(data):
         )
     }
 
+
+def log_values(data):
+    with open(CSV_FILE, 'a') as f:
+        writer = csv.writer(f)
+        writer.writerow([
+            time.time(),
+            data['mb_remaining'],
+            data['minutes_remaining']
+        ])
+
+
 if __name__ == "__main__":
     try:
         creds = json.loads(open('credentials.json').read())
@@ -38,6 +55,10 @@ if __name__ == "__main__":
             "username": raw_input("Your Koodo Prepaid email address:"),
             "password": getpass.getpass("Your Koodo Prepaid password:")
         }
-    print distill_html(fetch_html(
+    data = distill_html(fetch_html(
         creds['username'], creds['password']
     ))
+    if sys.stdout.isatty():
+        sys.stdout.write(str(data) + "\n")
+    else:
+        log_values(data)
