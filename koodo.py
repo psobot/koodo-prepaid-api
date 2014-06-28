@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 
 
 CSV_FILE = "public/koodo.csv"
+CSV_HEADER = "time,mb,min"
 
 
 def fetch_html(username, password):
@@ -38,6 +39,18 @@ def distill_html(data):
 
 
 def log_values(data):
+    try:
+        write_header = False
+        with open(CSV_FILE, 'r') as f:
+            firstLine = next(f).strip()
+            if firstLine != CSV_HEADER:
+                write_header = True
+        if write_header:
+            with open(CSV_FILE, 'w') as f:
+                f.write(CSV_HEADER + "\r\n")
+    except Exception as e:
+        print e
+        
     with open(CSV_FILE, 'a') as f:
         writer = csv.writer(f)
         writer.writerow([
