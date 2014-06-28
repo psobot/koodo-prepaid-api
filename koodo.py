@@ -7,7 +7,7 @@ import time
 from bs4 import BeautifulSoup
 
 
-CSV_FILE = "koodo.csv"
+CSV_FILE = "public/koodo.csv"
 
 
 def fetch_html(username, password):
