@@ -1,0 +1,1 @@
+0,30 * * * * nobody cd /var/www/koodo/ && /usr/bin/python /var/www/koodo/koodo.py > /dev/null
