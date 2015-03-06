@@ -1,77 +1,81 @@
-import mechanize
-import getpass
-import json
-import csv
+#!/usr/bin/env python
+
 import sys
 import time
-from bs4 import BeautifulSoup
+import json
+import datetime
+import traceback
+
+from flask import Flask
+from sqlalchemy import asc
+
+from scraper import fetch_booster_usage
+from database import db_session, LogEntry
+from credentials import get_creds
+
+app = Flask(__name__)
+app.debug = True
 
 
-CSV_FILE = "public/koodo.csv"
-CSV_HEADER = "time,mb,min"
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
 
 
-def fetch_html(username, password):
-    b = mechanize.Browser()
-    b.open("https://prepaidselfserve.koodomobile.com/Overview/")
-    b.select_form(nr=0)
-    b.form['ctl00$FullContent$ContentBottom$LoginControl$UserName'] = username
-    b.form['ctl00$FullContent$ContentBottom$LoginControl$Password'] = password
-    b.submit()
-    b.follow_link([x for x in b.links() if x.text == "View Booster Usage"][0])
-    return b.response().read()
+@app.route("/koodo.csv")
+def csv_data():
+    entries = LogEntry.query.order_by(asc(LogEntry.time)).all()
+    header = "time,min,mb"
+    rows = [
+        ','.join([
+            str(e.time.strftime('%s')),
+            str(e.minutes_remaining),
+            str(e.mb_remaining),
+        ]) for e in entries
+    ]
+    return "\n".join([header] + rows)
 
 
-def distill_html(data):
-    soup = BeautifulSoup(data)
-    dp = soup.find(id='FullContent_DashboardContent_ViewBundleUsagePanel')
-    
-    return {
-        "mb_remaining": sum(
-            float(x.contents[0])
-            for x in dp.findAll(id="DataRemainingLiteral")
-        ),
-        "minutes_remaining": sum(
-            float(x.contents[0])
-            for x in dp.findAll(id="CrossServiceRemainingLiteral")
-        )
-    }
+@app.route("/koodo.json")
+def json_data():
+    entries = LogEntry.query.order_by(asc(LogEntry.time)).all()
+    return json.dumps([x.to_object() for x in entries])
 
 
-def log_values(data):
+@app.route("/update", methods=['POST'])
+def update():
     try:
-        write_header = False
-        with open(CSV_FILE, 'r') as f:
-            firstLine = next(f).strip()
-            if firstLine != CSV_HEADER:
-                write_header = True
-        if write_header:
-            with open(CSV_FILE, 'w') as f:
-                f.write(CSV_HEADER + "\r\n")
+        return json.dumps(add_data_point().to_object())
     except Exception as e:
-        print e
-        
-    with open(CSV_FILE, 'a') as f:
-        writer = csv.writer(f)
-        writer.writerow([
-            time.time(),
-            data['mb_remaining'],
-            data['minutes_remaining']
-        ])
+        print traceback.format_exc(e)
+        raise e
 
+
+@app.route("/")
+def index():
+    return open('public/index.html', 'r').read()
+
+
+def add_data_point():
+    creds = get_creds()
+    data = fetch_booster_usage(
+        creds['username'], creds['password']
+    )
+    now = datetime.datetime.utcnow()
+    le = LogEntry(now, **data)
+    db_session.add(le)
+    db_session.commit()
+    return le
 
 if __name__ == "__main__":
-    try:
-        creds = json.loads(open('credentials.json').read())
-    except IOError:
-        creds = {
-            "username": raw_input("Your Koodo Prepaid email address:"),
-            "password": getpass.getpass("Your Koodo Prepaid password:")
-        }
-    data = distill_html(fetch_html(
-        creds['username'], creds['password']
-    ))
-    if sys.stdout.isatty():
-        sys.stdout.write(str(data) + "\n")
+    if ('--fetch' in sys.argv or
+            (sys.stdout.isatty() and '--server' not in sys.argv)):
+        start_time = time.time()
+        print "Fetching data from Koodo..."
+        print add_data_point().to_object()
+        end_time = time.time()
+        print "Done fetching. (Took %2.2f msec.)" % (
+            (end_time - start_time) * 1000
+        )
     else:
-        log_values(data)
+        app.run()

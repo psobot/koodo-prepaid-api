@@ -23,14 +23,29 @@ body {
   stroke-width: 1.5px;
 }
 
+path.mb, path.mins {
+  stroke: #000;
+  fill: none;
+}
+
+path.mb, text.mb {
+  stroke: #808;
+  color: #808;
+}
+
+path.mins, text.mins {
+  stroke: #070;
+  color: #070;
+}
+
 </style>
 <body>
 <script src="http://d3js.org/d3.v3.js"></script>
 <script>
 
-var margin = {top: 20, right: 40, bottom: 30, left: 50},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+var margin = {top: 20, right: 100, bottom: 30, left: 100},
+    width = window.innerWidth - 20 - margin.left - margin.right,
+    height = window.innerHeight - 20- margin.top - margin.bottom;
 
 var x = d3.time.scale()
     .range([0, width]);
@@ -90,6 +105,7 @@ d3.csv("koodo.csv", function(error, data) {
       .attr("x", -50)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
+      .attr('class', 'mb')
       .text("Megabytes Left");
 
   svg.append("g")
@@ -101,15 +117,18 @@ d3.csv("koodo.csv", function(error, data) {
       .attr("y", -12)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
+      .attr('class', 'mins')
       .text("Minutes Left");
 
   svg.append("path")
       .datum(data)
       .attr("class", "line")
+      .attr("class", "mb")
       .attr("d", line_mb);
   svg.append("path")
       .datum(data)
       .attr("class", "line")
+      .attr("class", "mins")
       .attr("d", line_mins);
 });
 
