@@ -11,8 +11,10 @@ usage - how many minutes and how many megabytes you have left on your mobile
 "Boosters."
 
 Includes a D3.js graph that you can look at to view your usage over time, as
-well as a cronjob that can automatically fetch data from Koodo. Runs well on
-Heroku.
+well as a cronjob that can automatically fetch data from Koodo.
+
+Runs well (and for free) on Heroku:
+[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
 ---
 

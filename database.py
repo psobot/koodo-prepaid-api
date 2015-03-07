@@ -6,9 +6,17 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, Float, DateTime
 
 default_connection_string = 'sqlite:///./koodo.db'
+
 connection_string = os.environ.get(
-    'DATABASE_URL', default_connection_string
+    'DATABASE_URL', os.environ.get(
+        'CLEARDB_DATABASE_URL',
+        default_connection_string
+    )
 )
+
+# MySQLdb doesn't like this option, but ClearDB provides it.
+connection_string = connection_string.replace('?reconnect=true', '')
+
 engine = create_engine(connection_string, convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,

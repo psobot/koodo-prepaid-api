@@ -1,0 +1,28 @@
+{
+  "name": "Koodo Prepaid API",
+  "description": "An API to pull data from Koodo's Prepaid Dashboard.",
+  "keywords": [
+    "koodo",
+    "api",
+    "canada",
+    "phone",
+    "mobile"
+  ],
+  "website": "https://prepaidselfserve.koodomobile.com/Overview/",
+  "repository": "https://github.com/psobot/koodo-prepaid-api",
+  "success_url": "/",
+  "env": {
+    "KOODO_PASSWORD": {
+      "description": "Your plaintext password for logging into prepaidselfserve.koodomobile.com.",
+      "required": true
+    },
+    "KOODO_USERNAME": {
+      "description": "Your email address used to log into prepaidselfserve.koodomobile.com.",
+      "required": true
+    }
+  },
+  "addons": [
+    "cleardb:ignite",
+    "scheduler:standard"
+  ]
+}
