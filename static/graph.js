@@ -1,71 +1,3 @@
-<!DOCTYPE html>
-<meta charset="utf-8">
-<style>
-
-body {
-  font: 10px sans-serif;
-}
-
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-
-.x.axis path {
-  display: none;
-}
-
-.line {
-  fill: none;
-  stroke: steelblue;
-  stroke-width: 1.5px;
-}
-
-path.mb, path.mins {
-  stroke: #000;
-  fill: none;
-}
-
-path.mb, text.mb {
-  stroke: #808;
-  color: #808;
-}
-
-path.mins, text.mins {
-  stroke: #070;
-  color: #070;
-}
-
-div.tooltip {
-  position: absolute;
-  text-align: center;
-  width: 60px;
-  height: 28px;
-  padding: 2px;
-  font: 12px sans-serif;
-  background: lightsteelblue;
-  border: 0px;
-  border-radius: 8px;
-  pointer-events: none;
-}
-
-.overlay {
-  fill: none;
-  pointer-events: all;
-}
-
-.focus circle {
-  fill: none;
-  stroke: steelblue;
-}
-
-</style>
-<body>
-<script src="http://d3js.org/d3.v3.js"></script>
-<script>
-
 var margin = {top: 20, right: 100, bottom: 30, left: 100},
     width = window.innerWidth - 20 - margin.left - margin.right,
     height = window.innerHeight - 20- margin.top - margin.bottom;
@@ -192,5 +124,3 @@ d3.csv("koodo.csv", function(error, data) {
     focus.select("text").text(formatData(d));
   }
 });
-
-</script>

@@ -6,7 +6,7 @@ import json
 import datetime
 import traceback
 
-from flask import Flask
+from flask import Flask, render_template
 from sqlalchemy import asc
 
 from scraper import fetch_booster_usage
@@ -53,7 +53,7 @@ def update():
 
 @app.route("/")
 def index():
-    return open('public/index.html', 'r').read()
+    return render_template('index.html')
 
 
 def add_data_point():
