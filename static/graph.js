@@ -43,7 +43,7 @@ var div = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
 
-d3.csv("koodo.csv", function(error, data) {
+d3.csv("usage.csv", function(error, data) {
   data.forEach(function(d) {
     d.date = new Date(d.time * 1000);
     d.mb = +d.mb;

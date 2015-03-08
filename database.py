@@ -3,7 +3,7 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, Float, DateTime
+from sqlalchemy import Column, Integer, Float, DateTime, Date, String
 
 default_connection_string = 'sqlite:///./koodo.db'
 
@@ -25,26 +25,36 @@ Base = declarative_base()
 Base.query = db_session.query_property()
 
 
-class LogEntry(Base):
-    __tablename__ = 'log_entries'
+class UsageDataPoint(Base):
+    __tablename__ = 'usage_data_points'
     id = Column(Integer, primary_key=True)
-    time = Column(DateTime())
+    time = Column(DateTime)
     minutes_remaining = Column(Float(32))
     mb_remaining = Column(Float(32))
-
-    def __init__(self, time=None, minutes_remaining=None, mb_remaining=None):
-        self.time = time
-        self.minutes_remaining = minutes_remaining
-        self.mb_remaining = mb_remaining
-
-    def __repr__(self):
-        return '<LogEntry %r>' % (self.time)
 
     def to_object(self):
         return {
             "at": self.time.isoformat(),
             "minutes_remaining": self.minutes_remaining,
             "mb_remaining": self.mb_remaining,
+        }
+
+
+class KoodoTransaction(Base):
+    __tablename__ = 'koodo_transactions'
+    id = Column(Integer, primary_key=True)
+    koodo_id = Column(Integer)
+    date = Column(Date)
+    description = Column(String(255))
+    credit = Column(Integer)
+    debit = Column(Integer)
+
+    def to_object(self):
+        return {
+            "date": self.date.isoformat(),
+            "description": self.description,
+            "credit": self.credit,
+            "debit": self.debit,
         }
 
 Base.metadata.create_all(bind=engine)
