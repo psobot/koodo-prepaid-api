@@ -106,7 +106,10 @@ class Scraper(object):
         self.browser.submit(name=searchButton, label=searchValue)
 
         soup = BeautifulSoup(self.browser.response().read())
-        transactions = soup.findAll('tr', {'class': 'gvTransactionHistoryRow'})
+        transactions = (
+            soup.findAll('tr', {'class': 'gvTransactionHistoryRow'}) +
+            soup.findAll('tr', {'class': 'gvTransactionHistoryAltRow'})
+        )
         return [self._parse_transaction_history_row(t) for t in transactions]
 
     def _parse_transaction_history_row(self, row):
@@ -118,8 +121,9 @@ class Scraper(object):
             if attribute == 'date':
                 value = datetime.strptime(value, '%b %d, %Y')
 
-            #   Convert dollar values to integer values of cents
-            elif value.startswith('$'):
+            #   Convert dollar values to integer values of cents,
+            #   assuming that the maximum dollar value is less than $1000
+            elif value.startswith('$') and len(value) <= len('$999.99'):
                 value = int(value.replace('$', '').replace('.', ''))
 
             elif attribute == 'koodo_id':
