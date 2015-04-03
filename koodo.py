@@ -62,8 +62,20 @@ def transactions_csv():
 @app.route("/transactions.json")
 def transactions_json():
     entries = KoodoTransaction.query.order_by(asc(KoodoTransaction.date)).all()
+    time_period = datetime.datetime.utcnow().date() - entries[0].date
+    total_seconds = time_period.total_seconds()
+    total_months = total_seconds / (30 * 24 * 60 * 60.)
+    total_paid = sum([(x.credit or 0) for x in entries])
+    response = {
+        "transactions": [x.to_object() for x in entries],
+        "balance": sum([(x.credit or 0) - (x.debit or 0) for x in entries]),
+        "total_paid": total_paid,
+        "total_used": sum([(x.debit or 0) for x in entries]),
+        "number_months": total_months,
+        "avg_monthly_cost": total_paid / total_months,
+    }
     return Response(
-        json.dumps([x.to_object() for x in entries]),
+        json.dumps(response),
         mimetype='application/json'
     )
 
